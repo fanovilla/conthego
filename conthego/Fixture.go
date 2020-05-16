@@ -1,6 +1,19 @@
 package conthego
 
+import "strings"
+
 type Fixture struct {
+	vars map[string]string
+}
+
+func NewFixture() *Fixture {
+	var f Fixture
+	f.vars = make(map[string]string)
+	return &f
+}
+
+func (f Fixture) putVar(name string, value string) {
+	f.vars[name] = value
 }
 
 func collectCommands(node *Node, commands *[]Command) {
@@ -19,30 +32,21 @@ func collectCommands(node *Node, commands *[]Command) {
 }
 
 func processCommands(commands *[]Command) {
+	f := NewFixture()
 	for i := range *commands {
 		command := (*commands)[i]
 		instr := command.instruction
-		if instr[0] == '?' {
-			method := instr[1 : len(instr)-2]
-			outs, err := InvokeMethod(Fixture{}, method)
-			if err != nil {
-				panic(err)
-			}
-			out := outs[0]
-			atom := formatAtom(out)
-
-			strValue, ok := atom.(string)
-			if !ok {
-				panic("not a string")
-			}
-
+		if instr[0] == '?' && strings.HasSuffix(instr, ")") { // method call
+			strValue := callMethod(f, instr[1:len(instr)])
 			strExpected := command.node.Content
 			if strExpected == strValue {
 				command.success()
 			} else {
 				command.failure()
 			}
-
+		} else {
+			// variable assignment
+			f.putVar(instr, command.node.Content)
 		}
 	}
 }

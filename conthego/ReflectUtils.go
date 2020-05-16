@@ -4,7 +4,44 @@ import (
 	"errors"
 	"log"
 	"reflect"
+	"strings"
 )
+
+func callMethod(f *Fixture, instr string) string {
+	iOpen := strings.Index(instr, "(")
+	iClose := strings.Index(instr, ")")
+	args := make([]string, 0)
+
+	var outputs []reflect.Value
+	var err error
+	method := instr[0:iOpen]
+	if iOpen+1 < iClose { // args present
+		splits := strings.Split(instr[iOpen+1:iClose], ",")
+		for _, split := range splits {
+			args = append(args, f.vars[strings.TrimSpace(split)])
+		}
+		// https://stackoverflow.com/questions/12753805/type-converting-slices-of-interfaces
+		b := make([]interface{}, len(args))
+		for i := range args {
+			b[i] = args[i]
+		}
+		outputs, err = InvokeMethod(f, method, b...)
+	} else {
+		outputs, err = InvokeMethod(f, method)
+	}
+
+	if err != nil {
+		panic(err)
+	}
+	out := outputs[0]
+	atom := formatAtom(out)
+
+	strValue, ok := atom.(string)
+	if !ok {
+		panic("not a string")
+	}
+	return strValue
+}
 
 //https://github.com/kubernetes/kops/blob/master/util/pkg/reflectutils/walk.go
 func InvokeMethod(target interface{}, name string, args ...interface{}) ([]reflect.Value, error) {
