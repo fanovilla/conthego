@@ -25,9 +25,9 @@ func callMethod(f *Fixture, instr string) string {
 		for i := range args {
 			b[i] = args[i]
 		}
-		outputs, err = InvokeMethod(f, method, b...)
+		outputs, err = invokeMethodInternal(f, method, b...)
 	} else {
-		outputs, err = InvokeMethod(f, method)
+		outputs, err = invokeMethodInternal(f, method)
 	}
 
 	if err != nil {
@@ -44,7 +44,7 @@ func callMethod(f *Fixture, instr string) string {
 }
 
 //https://github.com/kubernetes/kops/blob/master/util/pkg/reflectutils/walk.go
-func InvokeMethod(target interface{}, name string, args ...interface{}) ([]reflect.Value, error) {
+func invokeMethodInternal(target interface{}, name string, args ...interface{}) ([]reflect.Value, error) {
 	v := reflect.ValueOf(target)
 
 	method, found := v.Type().MethodByName(name)
