@@ -1,7 +1,6 @@
 # BACKLOG
 
 ## MVP
-* fail on panic
 * execute and verify table rows
 * reporting - generatedDateTime
 * reporting - expectedToFail

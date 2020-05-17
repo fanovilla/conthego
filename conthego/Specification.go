@@ -11,6 +11,13 @@ import (
 )
 
 func RunSpec(f *fixtureContext) {
+	// https://blog.golang.org/defer-panic-and-recover
+	defer func() {
+		if r := recover(); r != nil {
+			f.t.Fatal(fmt.Sprint(r))
+		}
+	}()
+
 	baseName := getSpecBaseName()
 	content := readFile(baseName + ".md")
 	html := markdown.ToHTML(content, nil, nil)
