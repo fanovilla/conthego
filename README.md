@@ -3,7 +3,30 @@
 A lightweight, opinionated implementation of a Specification By Example (SBE) framework in golang.
 Inspired by [concordion.org](https://concordion.org).
 
+## Usage
+
+The package can be imported as `github.com/fanovilla/conthego/conthego`.
+
 See examples in the `examples` directory.
+
+Sample specification `AssertEquals.md`
+```markdown
+[Hello World!](- "?GetGreeting()")
+```
+
+Sample fixture `AssertEquals_test.go`
+```go
+func TestAssertEquals(t *testing.T) {
+	conthego.RunSpec(conthego.NewFixture(t, &FixtureAssertEquals{}))
+}
+
+type FixtureAssertEquals struct {
+}
+
+func (f FixtureAssertEquals) GetGreeting() string {
+	return "Hello World!"
+}
+```
 
 ## Supported Commands
 
@@ -19,7 +42,7 @@ echo
 
 exec
 [ ](- "Hello()")
-[ ](- "var1=Hello(TEXT)")
+[Blah](- "var1=Hello(TEXT)")
 [ ](- "var2=Hello(var1)")
 [ ](- "var1=Hello('literal')")
 
@@ -33,3 +56,6 @@ directives
 
 ```
 
+## Tips
+
+* struct properties to assert on must be exported (dependent on json marshal behaviour)

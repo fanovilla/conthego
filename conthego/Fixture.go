@@ -30,21 +30,15 @@ func (f fixtureContext) getVar(name string) interface{} {
 	return f.vars[name]
 }
 
-func (f fixtureContext) evalVar(rawVar string) string {
-	var strValue string
+func (f fixtureContext) evalVar(rawVar string) interface{} {
 	if strings.Contains(rawVar, ".") { // dot-notation
 		rawVal := f.getVar(rawVar[0:strings.Index(rawVar, ".")])
 		keyString := rawVar[strings.Index(rawVar, ".")+1 : len(rawVar)]
 		content, _ := dotnotation.Get(rawVal, keyString)
-		if content == nil {
-			strValue = "nil"
-		} else {
-			strValue = fmt.Sprint(content)
-		}
+		return content
 	} else {
-		strValue = f.getVar(rawVar).(string)
+		return f.getVar(rawVar)
 	}
-	return strValue
 }
 
 func collectCommands(node *Node, commands *[]Command) {
@@ -74,23 +68,23 @@ func processCommands(f *fixtureContext, commands *[]Command) {
 
 		} else if instr[0] == '?' && strings.HasSuffix(instr, ")") {
 			// assert method call
-			strValue := callMethod(f, instr[1:len(instr)], command.getTextVal())
-			command.assert(f, strValue.(string))
+			genericVal := callMethod(f, instr[1:len(instr)], command.getTextVal())
+			command.assert(f, genericVal)
 
 		} else if instr[0] == '?' {
 			// assert var
-			strValue := f.evalVar(instr[1:len(instr)])
-			command.assert(f, strValue)
+			genericVal := f.evalVar(instr[1:len(instr)])
+			command.assert(f, genericVal)
 
 		} else if instr[0] == '$' && strings.HasSuffix(instr, ")") {
 			// echo method call
-			strValue := callMethod(f, instr[1:len(instr)], command.getTextVal())
-			command.echo(strValue.(string))
+			genericVal := callMethod(f, instr[1:len(instr)], command.getTextVal())
+			command.echo(fmt.Sprint(genericVal))
 
 		} else if instr[0] == '$' {
 			// echo var
-			strValue := f.evalVar(instr[1:len(instr)])
-			command.echo(strValue)
+			genericVal := f.evalVar(instr[1:len(instr)])
+			command.echo(fmt.Sprint(genericVal))
 
 		} else if strings.HasSuffix(instr, ")") {
 			// var assignment, method call

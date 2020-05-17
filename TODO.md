@@ -1,13 +1,17 @@
+# BACKLOG
 
-* command isTrue
+## MVP
 * return slice
+* fail on panic
 * execute and verify table rows
+* context in local fixture
 * reporting - generatedDateTime
 * reporting - expectedToFail
+
+## MEDIUM TERM
 * failure stacktrace
 * no clobber existing styles
 * param literal
-* context in local fixture
 * multiple independent examples in spec
 * big decimal binding?
 * build
@@ -16,4 +20,3 @@
 * reporting - index page
 * injectable css
 * tighten package exports
-
