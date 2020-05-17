@@ -1,11 +1,12 @@
 # BACKLOG
 
 ## MVP
-* execute and verify table rows
+* execute table rows
+* verify table rows
 * reporting - generatedDateTime
 * reporting - expectedToFail
 
-## MEDIUM TERM
+## OTHERS
 * echo list
 * echo map
 * failure stacktrace
