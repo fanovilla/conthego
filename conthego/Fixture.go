@@ -2,18 +2,24 @@ package conthego
 
 import "strings"
 
-type Fixture struct {
-	vars map[string]string
+type fixtureContext struct {
+	vars         map[string]string
+	localFixture interface{}
 }
 
-func NewFixture() *Fixture {
-	var f Fixture
+func NewFixture(internalFixture interface{}) *fixtureContext {
+	var f fixtureContext
 	f.vars = make(map[string]string)
+	f.localFixture = internalFixture
 	return &f
 }
 
-func (f Fixture) putVar(name string, value string) {
+func (f fixtureContext) putVar(name string, value string) {
 	f.vars[name] = value
+}
+
+func (f fixtureContext) getVar(name string) string {
+	return f.vars[name]
 }
 
 func collectCommands(node *Node, commands *[]Command) {
@@ -31,8 +37,7 @@ func collectCommands(node *Node, commands *[]Command) {
 	}
 }
 
-func processCommands(commands *[]Command) {
-	f := NewFixture()
+func processCommands(f *fixtureContext, commands *[]Command) {
 	for i := range *commands {
 		command := (*commands)[i]
 		instr := command.instruction
@@ -44,6 +49,11 @@ func processCommands(commands *[]Command) {
 			} else {
 				command.failure()
 			}
+		} else if instr[0] == '$' && strings.HasSuffix(instr, ")") { // echo method call
+			strValue := callMethod(f, instr[1:len(instr)])
+			command.echo(strValue)
+		} else if instr[0] == '$' { // echo var
+			command.echo(f.getVar(instr[1:len(instr)]))
 		} else {
 			// variable assignment
 			f.putVar(instr, command.node.Content)

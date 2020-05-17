@@ -45,7 +45,6 @@ func unmarshal(html []byte) *Node {
 func (n *Node) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	n.Attrs = start.Attr
 	type node Node
-
 	return d.DecodeElement((*node)(n), &start)
 }
 

@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func RunSpec() {
+func RunSpec(f *fixtureContext) {
 	baseName := getSpecBaseName()
 	content := readFile(baseName + ".md")
 	html := markdown.ToHTML(content, nil, nil)
@@ -18,7 +18,7 @@ func RunSpec() {
 	rootNode := unmarshal(html)
 	commands := make([]Command, 0)
 	collectCommands(rootNode, &commands)
-	processCommands(&commands)
+	processCommands(f, &commands)
 
 	bytes := marshal(rootNode)
 	fmt.Println(string(bytes))

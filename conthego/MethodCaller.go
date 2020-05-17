@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func callMethod(f *Fixture, instr string) string {
+func callMethod(f *fixtureContext, instr string) string {
 	iOpen := strings.Index(instr, "(")
 	iClose := strings.Index(instr, ")")
 	args := make([]string, 0)
@@ -25,9 +25,9 @@ func callMethod(f *Fixture, instr string) string {
 		for i := range args {
 			b[i] = args[i]
 		}
-		outputs, err = invokeMethodInternal(f, method, b...)
+		outputs, err = invokeMethodInternal(f.localFixture, method, b...)
 	} else {
-		outputs, err = invokeMethodInternal(f, method)
+		outputs, err = invokeMethodInternal(f.localFixture, method)
 	}
 
 	if err != nil {
