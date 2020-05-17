@@ -1,16 +1,17 @@
 # BACKLOG
 
 ## MVP
-* return slice
 * fail on panic
 * execute and verify table rows
-* context in local fixture
 * reporting - generatedDateTime
 * reporting - expectedToFail
 
 ## MEDIUM TERM
+* echo list
+* echo map
 * failure stacktrace
 * no clobber existing styles
+* list indexing
 * param literal
 * multiple independent examples in spec
 * big decimal binding?
