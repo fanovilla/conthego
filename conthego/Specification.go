@@ -5,19 +5,22 @@ import (
 	"github.com/gomarkdown/markdown"
 	"io/ioutil"
 	"os"
+	"testing"
+
 	//"os"
 	"runtime"
 	"strings"
 )
 
-func RunSpec(f *fixtureContext) {
+func RunSpec(t *testing.T, internalFixture interface{}) {
 	// https://blog.golang.org/defer-panic-and-recover
 	defer func() {
 		if r := recover(); r != nil {
-			f.t.Fatal(fmt.Sprint(r))
+			t.Fatal(fmt.Sprint(r))
 		}
 	}()
 
+	f := newFixture(t, internalFixture)
 	baseName := getSpecBaseName()
 	content := readFile(baseName + ".md")
 	html := markdown.ToHTML(content, nil, nil)

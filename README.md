@@ -17,7 +17,7 @@ Sample specification `AssertEquals.md`
 Sample fixture `AssertEquals_test.go`
 ```go
 func TestAssertEquals(t *testing.T) {
-	conthego.RunSpec(conthego.NewFixture(t, &FixtureAssertEquals{}))
+	conthego.RunSpec(t, &FixtureAssertEquals{})
 }
 
 type FixtureAssertEquals struct {
@@ -55,6 +55,9 @@ directives
 [ ](- "!expectedtofail")
 
 ```
+
+See [TODOs](TODO.md)
+
 
 ## Tips
 

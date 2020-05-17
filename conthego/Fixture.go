@@ -14,7 +14,7 @@ type fixtureContext struct {
 	t              *testing.T
 }
 
-func NewFixture(t *testing.T, internalFixture interface{}) *fixtureContext {
+func newFixture(t *testing.T, internalFixture interface{}) *fixtureContext {
 	var f fixtureContext
 	f.vars = make(map[string]interface{})
 	f.localFixture = internalFixture

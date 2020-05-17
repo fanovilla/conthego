@@ -6,7 +6,7 @@ import (
 )
 
 func TestReturnStruct(t *testing.T) {
-	conthego.RunSpec(conthego.NewFixture(t, &FixtureReturnStruct{}))
+	conthego.RunSpec(t, &FixtureReturnStruct{})
 }
 
 type FixtureReturnStruct struct {

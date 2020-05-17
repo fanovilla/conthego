@@ -6,7 +6,7 @@ import (
 )
 
 func TestReturnSlice(t *testing.T) {
-	conthego.RunSpec(conthego.NewFixture(t, &FixtureReturnSlice{}))
+	conthego.RunSpec(t, &FixtureReturnSlice{})
 }
 
 var list *[]string
