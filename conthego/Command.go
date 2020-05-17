@@ -20,3 +20,7 @@ func (c Command) failure() {
 func (c Command) echo(value string) {
 	c.node.Content = value
 }
+
+func (c Command) getTextVal() string {
+	return c.node.Content
+}

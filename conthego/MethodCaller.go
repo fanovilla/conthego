@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func callMethod(f *fixtureContext, instr string) string {
+func callMethod(f *fixtureContext, instr string, textVal string) string {
 	iOpen := strings.Index(instr, "(")
 	iClose := strings.Index(instr, ")")
 	args := make([]string, 0)
@@ -18,7 +18,12 @@ func callMethod(f *fixtureContext, instr string) string {
 	if iOpen+1 < iClose { // args present
 		splits := strings.Split(instr[iOpen+1:iClose], ",")
 		for _, split := range splits {
-			args = append(args, f.vars[strings.TrimSpace(split)])
+			rawVar := strings.TrimSpace(split)
+			val := f.vars[rawVar]
+			if rawVar == "TEXT" {
+				val = textVal
+			}
+			args = append(args, val)
 		}
 		// https://stackoverflow.com/questions/12753805/type-converting-slices-of-interfaces
 		b := make([]interface{}, len(args))

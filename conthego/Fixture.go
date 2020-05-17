@@ -41,22 +41,37 @@ func processCommands(f *fixtureContext, commands *[]Command) {
 	for i := range *commands {
 		command := (*commands)[i]
 		instr := command.instruction
-		if instr[0] == '?' && strings.HasSuffix(instr, ")") { // method call
-			strValue := callMethod(f, instr[1:len(instr)])
-			strExpected := command.node.Content
-			if strExpected == strValue {
-				command.success()
-			} else {
-				command.failure()
-			}
+		if instr[0] == '?' && strings.HasSuffix(instr, ")") { // assert method call
+			strValue := callMethod(f, instr[1:len(instr)], command.getTextVal())
+			assertEquals(&command, command.getTextVal(), strValue)
+
+		} else if instr[0] == '?' { // assert var
+			strValue := f.getVar(instr[1:len(instr)])
+			assertEquals(&command, command.getTextVal(), strValue)
+
 		} else if instr[0] == '$' && strings.HasSuffix(instr, ")") { // echo method call
-			strValue := callMethod(f, instr[1:len(instr)])
+			strValue := callMethod(f, instr[1:len(instr)], command.getTextVal())
 			command.echo(strValue)
+
 		} else if instr[0] == '$' { // echo var
 			command.echo(f.getVar(instr[1:len(instr)]))
-		} else {
-			// variable assignment
+
+		} else if strings.HasSuffix(instr, ")") { // var assignment, method call
+			varName := instr[0:strings.Index(instr, "=")]
+			methodCall := instr[strings.Index(instr, "=")+1 : len(instr)]
+			strValue := callMethod(f, methodCall, command.getTextVal())
+			f.putVar(varName, strValue)
+
+		} else { // var assignment
 			f.putVar(instr, command.node.Content)
 		}
+	}
+}
+
+func assertEquals(command *Command, expected string, actual string) {
+	if expected == actual {
+		command.success()
+	} else {
+		command.failure()
 	}
 }

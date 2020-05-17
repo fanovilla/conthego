@@ -1,10 +1,9 @@
 
-* param TEXT
 * return struct
 * execute and verify table rows
 * command isTrue
-* execute and assign
 * test failures
+* expectedToFail
 * comparison on equality failure
 * failure stacktrace
 * echo dot navigation
