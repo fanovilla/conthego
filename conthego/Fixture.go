@@ -1,19 +1,24 @@
 package conthego
 
 import (
+	"fmt"
 	"github.com/joeycumines/go-dotnotation/dotnotation"
 	"strings"
+	"testing"
 )
 
 type fixtureContext struct {
-	vars         map[string]interface{}
-	localFixture interface{}
+	vars           map[string]interface{}
+	localFixture   interface{}
+	expectedToFail bool
+	t              *testing.T
 }
 
-func NewFixture(internalFixture interface{}) *fixtureContext {
+func NewFixture(t *testing.T, internalFixture interface{}) *fixtureContext {
 	var f fixtureContext
 	f.vars = make(map[string]interface{})
 	f.localFixture = internalFixture
+	f.t = t
 	return &f
 }
 
@@ -34,7 +39,7 @@ func (f fixtureContext) evalVar(rawVar string) string {
 		if content == nil {
 			strValue = "nil"
 		} else {
-			strValue = content.(string)
+			strValue = fmt.Sprint(content)
 		}
 	} else {
 		strValue = f.getVar(rawVar).(string)
@@ -61,15 +66,21 @@ func processCommands(f *fixtureContext, commands *[]Command) {
 	for i := range *commands {
 		command := (*commands)[i]
 		instr := command.instruction
-		if instr[0] == '?' && strings.HasSuffix(instr, ")") {
+		if instr[0] == '!' {
+			// directive
+			if "ExpectedToFail" == instr[1:len(instr)] {
+				f.expectedToFail = true
+			}
+
+		} else if instr[0] == '?' && strings.HasSuffix(instr, ")") {
 			// assert method call
 			strValue := callMethod(f, instr[1:len(instr)], command.getTextVal())
-			assertEquals(&command, command.getTextVal(), strValue.(string))
+			command.assert(f, strValue.(string))
 
 		} else if instr[0] == '?' {
 			// assert var
 			strValue := f.evalVar(instr[1:len(instr)])
-			assertEquals(&command, command.getTextVal(), strValue)
+			command.assert(f, strValue)
 
 		} else if instr[0] == '$' && strings.HasSuffix(instr, ")") {
 			// echo method call
@@ -92,13 +103,5 @@ func processCommands(f *fixtureContext, commands *[]Command) {
 			// var assignment
 			f.putVar(instr, command.getTextVal())
 		}
-	}
-}
-
-func assertEquals(command *Command, expected string, actual string) {
-	if expected == actual {
-		command.success()
-	} else {
-		command.failure()
 	}
 }

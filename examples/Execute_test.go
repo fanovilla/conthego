@@ -6,7 +6,7 @@ import (
 )
 
 func TestExecute(t *testing.T) {
-	conthego.RunSpec(conthego.NewFixture(&FixtureExecute{}))
+	conthego.RunSpec(conthego.NewFixture(t, &FixtureExecute{}))
 }
 
 type FixtureExecute struct {

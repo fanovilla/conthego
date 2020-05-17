@@ -6,7 +6,7 @@ import (
 )
 
 func TestAssertEquals(t *testing.T) {
-	conthego.RunSpec(conthego.NewFixture(&FixtureAssertEquals{}))
+	conthego.RunSpec(conthego.NewFixture(t, &FixtureAssertEquals{}))
 }
 
 type FixtureAssertEquals struct {

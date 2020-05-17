@@ -6,7 +6,7 @@ import (
 )
 
 func TestEcho(t *testing.T) {
-	conthego.RunSpec(conthego.NewFixture(&FixtureEcho{}))
+	conthego.RunSpec(conthego.NewFixture(t, &FixtureEcho{}))
 }
 
 type FixtureEcho struct {

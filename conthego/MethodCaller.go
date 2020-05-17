@@ -80,7 +80,7 @@ func formatAtom(v reflect.Value) interface{} {
 		return v.String()
 	case reflect.Slice:
 		return v.Slice(0, 1)
-	case reflect.Struct:
+	case reflect.Struct, reflect.Map:
 		return structToMap(v.Interface())
 	default: // reflect.Array, reflect.Interface
 		return v.Type().String() + " value"

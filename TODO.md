@@ -1,11 +1,9 @@
 
-* return map
-* execute and verify table rows
 * command isTrue
-* test failures
-* add generatedDateTime
-* expectedToFail
-* comparison on equality failure
+* return slice
+* execute and verify table rows
+* reporting - generatedDateTime
+* reporting - expectedToFail
 * failure stacktrace
 * no clobber existing styles
 * param literal
@@ -15,7 +13,7 @@
 * build
 * versioning - https://github.com/golang/go/wiki/Modules
 * documentation
-* reporting
+* reporting - index page
 * injectable css
 * tighten package exports
 
