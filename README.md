@@ -26,5 +26,6 @@ exec
 isTrue or assertEquals
 [World](- "?Hello()")
 [World](- "?var1")
+[World](- "?var1.prop")
 ```
 

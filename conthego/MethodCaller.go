@@ -1,13 +1,14 @@
 package conthego
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
 	"reflect"
 	"strings"
 )
 
-func callMethod(f *fixtureContext, instr string, textVal string) string {
+func callMethod(f *fixtureContext, instr string, textVal string) interface{} {
 	iOpen := strings.Index(instr, "(")
 	iClose := strings.Index(instr, ")")
 	args := make([]string, 0)
@@ -23,7 +24,7 @@ func callMethod(f *fixtureContext, instr string, textVal string) string {
 			if rawVar == "TEXT" {
 				val = textVal
 			}
-			args = append(args, val)
+			args = append(args, val.(string))
 		}
 		// https://stackoverflow.com/questions/12753805/type-converting-slices-of-interfaces
 		b := make([]interface{}, len(args))
@@ -40,12 +41,7 @@ func callMethod(f *fixtureContext, instr string, textVal string) string {
 	}
 	out := outputs[0]
 	atom := formatAtom(out)
-
-	strValue, ok := atom.(string)
-	if !ok {
-		panic("not a string")
-	}
-	return strValue
+	return atom
 }
 
 //https://github.com/kubernetes/kops/blob/master/util/pkg/reflectutils/walk.go
@@ -84,9 +80,24 @@ func formatAtom(v reflect.Value) interface{} {
 		return v.String()
 	case reflect.Slice:
 		return v.Slice(0, 1)
-	default: // reflect.Array, reflect.Struct, reflect.Interface
+	case reflect.Struct:
+		return structToMap(v.Interface())
+	default: // reflect.Array, reflect.Interface
 		return v.Type().String() + " value"
 	}
+}
+
+func structToMap(m interface{}) map[string]interface{} {
+	b, err := json.Marshal(m)
+	if err != nil {
+		panic(err)
+	}
+
+	var dat map[string]interface{}
+	if err := json.Unmarshal(b, &dat); err != nil {
+		panic(err)
+	}
+	return dat
 }
 
 func Invoke(any interface{}, name string, args ...interface{}) {

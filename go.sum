@@ -1,5 +1,7 @@
-github.com/gomarkdown/markdown v0.0.0-20200511185550-6e300993a645 h1:xDQ/U5ds+1ZRc363tGSmnepf8UoCXGSyf2sSYtLCCi8=
-github.com/gomarkdown/markdown v0.0.0-20200511185550-6e300993a645/go.mod h1:aii0r/K0ZnHv7G0KF7xy1v0A7s2Ljrb5byB7MO5p6TU=
+github.com/go-test/deep v1.0.6 h1:UHSEyLZUwX9Qoi99vVwvewiMC8mM2bf7XEM2nqvzEn8=
+github.com/go-test/deep v1.0.6/go.mod h1:QV8Hv/iy04NyLBxAdO9njL0iVPN1S4d/A3NVv1V36o8=
 github.com/gomarkdown/markdown v0.0.0-20200513213024-62c5e2c608cc h1:T+Fwk3llJdUIQeBI8fC/ARqRD5mWy3AE5I6ZU3VkIw8=
 github.com/gomarkdown/markdown v0.0.0-20200513213024-62c5e2c608cc/go.mod h1:aii0r/K0ZnHv7G0KF7xy1v0A7s2Ljrb5byB7MO5p6TU=
+github.com/joeycumines/go-dotnotation v0.0.0-20180131115956-2d3612e36c5d h1:ljoJyU5NEhe3LWXrRSHnYqWtQehQSJ+9d9tfIGNbpSw=
+github.com/joeycumines/go-dotnotation v0.0.0-20180131115956-2d3612e36c5d/go.mod h1:siHz7M0dAufA9aNRidkfckDSVB/S+Ld7allyOe5uxVg=
 golang.org/dl v0.0.0-20190829154251-82a15e2f2ead/go.mod h1:IUMfjQLJQd4UTqG1Z90tenwKoCX93Gn3MAQJMOSBsDQ=
