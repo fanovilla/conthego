@@ -1,6 +1,7 @@
 package conthego
 
 import (
+	"encoding/xml"
 	"fmt"
 	"github.com/joeycumines/go-dotnotation/dotnotation"
 	"strings"
@@ -48,11 +49,47 @@ func collectCommands(node *Node, commands *[]Command) {
 	}
 
 	if m["href"] == "-" {
-		*commands = append(*commands, Command{node, m["title"], m["styles"]})
+		*commands = append(*commands, Command{node, strings.TrimSpace(m["title"]), m["styles"]})
 	}
 
 	for i := range node.Nodes {
 		collectCommands(&(node.Nodes[i]), commands)
+	}
+}
+
+func processTable(table *Node) {
+	ths := table.Nodes[0].Nodes[0].Nodes // table>thead>tr>th
+	trs := table.Nodes[1].Nodes          // table>tbody>tr
+	for i := range trs {                 // for each row
+		for j := range ths { // for each header col
+			if len(ths[j].Nodes) > 0 { // assume has anchor child
+				m := make(map[string]string)
+				anchor := ths[j].Nodes[0]
+				for _, a := range anchor.Attrs {
+					m[a.Name.Local] = a.Value
+				}
+				if m["href"] == "-" { // if header col has command copy it to row col
+					trs[i].Nodes[j].Nodes = []Node{anchor}
+					trs[i].Nodes[j].Nodes[0].Content = trs[i].Nodes[j].Content
+					trs[i].Nodes[j].Content = ""
+				}
+			}
+		}
+	}
+	for j := range ths { // for each header col
+		if len(ths[j].Nodes) > 0 { // assume has anchor child
+			ths[j].Nodes[0].Attrs = []xml.Attr{}
+		}
+	}
+}
+
+func normaliseCommands(node *Node) {
+	if node.elem() == "table" {
+		processTable(node)
+	} else {
+		for i := range node.Nodes {
+			normaliseCommands(&(node.Nodes[i]))
+		}
 	}
 }
 
@@ -88,14 +125,16 @@ func processCommands(f *fixtureContext, commands *[]Command) {
 
 		} else if strings.HasSuffix(instr, ")") {
 			// var assignment, method call
-			varName := instr[0:strings.Index(instr, "=")]
-			methodCall := instr[strings.Index(instr, "=")+1 : len(instr)]
+			varName := strings.TrimSpace(instr[0:strings.Index(instr, "=")])
+			methodCall := strings.TrimSpace(instr[strings.Index(instr, "=")+1 : len(instr)])
 			strValue := callMethod(f, methodCall, command.getTextVal())
 			f.putVar(varName, strValue)
+			command.restyle()
 
 		} else {
 			// var assignment
 			f.putVar(instr, command.getTextVal())
+			command.restyle()
 		}
 	}
 }

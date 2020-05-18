@@ -27,6 +27,7 @@ func RunSpec(t *testing.T, internalFixture interface{}) {
 
 	rootNode := unmarshal(html)
 	commands := make([]Command, 0)
+	normaliseCommands(rootNode)
 	collectCommands(rootNode, &commands)
 	processCommands(f, &commands)
 
@@ -66,14 +67,3 @@ func writeFile(filePath string, content []byte) {
 		panic("error writing output:" + filePath)
 	}
 }
-
-//if _, err := os.Stat("/path/to/whatever"); os.IsNotExist(err) {
-//// path/to/whatever does not exist
-//}
-
-//n := new(big.Float)
-//n, ok := n.SetString("44.3355")
-//if !ok {
-//	fmt.Println("SetString: error")
-//	return
-//}

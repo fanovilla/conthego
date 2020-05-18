@@ -13,6 +13,10 @@ type Node struct {
 	Nodes   []Node     `xml:",any"`
 }
 
+func (n Node) elem() string {
+	return n.XMLName.Local
+}
+
 // https://stackoverflow.com/questions/52669545/round-trip-xml-through-unmarshal-and-marshalindent
 var replacer = strings.NewReplacer("&#xA;", "", "&#x9;", "", "\n", "", "\t", "")
 

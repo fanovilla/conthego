@@ -44,7 +44,6 @@ exec
 [ ](- "Hello()")
 [Blah](- "var1=Hello(TEXT)")
 [ ](- "var2=Hello(var1)")
-[ ](- "var1=Hello('literal')")
 
 isTrue or assertEquals
 [World](- "?Hello()")
@@ -58,7 +57,19 @@ directives
 
 See [TODOs](TODO.md)
 
+See table examples in the `examples` directory.
 
-## Tips
 
+## Notes
+
+### specifications
+* strict markdown tables: at most a single command per column; no column should be dependent on any column to its right
+* empty link text currently require a single space (e.g. use `[ ]` not `[]`)
+* echo command uses a `$` prefix (not `c:echo=`)
+* assert command uses a `?` prefix (not `?=`)
+* set command uses no prefix (no `#`)
+* params for method calls uses no prefix (no `#`)
+* params for method calls bound as strings; please do conversion as per need inside fixture methods
+
+### fixtures
 * struct properties to assert on must be exported (dependent on json marshal behaviour)
