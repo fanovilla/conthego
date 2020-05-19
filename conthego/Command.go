@@ -56,7 +56,9 @@ func styleNode(node *Node, class string) {
 }
 
 func (c Command) assert(f *fixtureContext, val interface{}) {
-	if actual, ok := val.(bool); ok {
+	if val == nil {
+		c.failure(f, "nil")
+	} else if actual, ok := val.(bool); ok {
 		if actual {
 			c.success()
 		} else {

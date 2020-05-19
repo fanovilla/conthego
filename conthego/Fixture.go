@@ -4,6 +4,8 @@ import (
 	"encoding/xml"
 	"fmt"
 	"github.com/joeycumines/go-dotnotation/dotnotation"
+	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -33,7 +35,23 @@ func (f fixtureContext) getVar(name string) interface{} {
 }
 
 func (f fixtureContext) evalVar(rawVar string) interface{} {
-	if strings.Contains(rawVar, ".") { // dot-notation
+	if strings.HasSuffix(rawVar, "]") { // simple indexed
+		open := strings.Index(rawVar, "[")
+		close := strings.Index(rawVar, "]")
+		rawVal := f.getVar(rawVar[0:open])
+		index, err := strconv.Atoi(rawVar[open+1 : close])
+		if err != nil {
+			panic(err)
+		}
+		// https://stackoverflow.com/questions/14025833/range-over-interface-which-stores-a-slice
+		switch reflect.TypeOf(rawVal).Kind() {
+		case reflect.Slice:
+			s := reflect.ValueOf(rawVal)
+			return formatAtom(s.Index(index))
+		}
+		return "invalid index " + rawVar
+
+	} else if strings.Contains(rawVar, ".") { // dot-notation
 		rawVal := f.getVar(rawVar[0:strings.Index(rawVar, ".")])
 		keyString := rawVar[strings.Index(rawVar, ".")+1 : len(rawVar)]
 		content, _ := dotnotation.Get(rawVal, keyString)
@@ -44,11 +62,7 @@ func (f fixtureContext) evalVar(rawVar string) interface{} {
 }
 
 func collectCommands(node *Node, commands *[]Command) {
-	m := make(map[string]string)
-	for _, a := range node.Attrs {
-		m[a.Name.Local] = a.Value
-	}
-
+	m := collectAttrs(node)
 	if m["href"] == "-" {
 		*commands = append(*commands, Command{node, strings.TrimSpace(m["title"]), m["styles"]})
 	}
@@ -58,17 +72,22 @@ func collectCommands(node *Node, commands *[]Command) {
 	}
 }
 
+func collectAttrs(anchor *Node) map[string]string {
+	m := make(map[string]string)
+	for _, a := range anchor.Attrs {
+		m[a.Name.Local] = a.Value
+	}
+	return m
+}
+
 func processTable(table *Node) {
 	ths := table.Nodes[0].Nodes[0].Nodes // table>thead>tr>th
 	trs := table.Nodes[1].Nodes          // table>tbody>tr
 	for i := range trs {                 // for each row
 		for j := range ths { // for each header col
 			if len(ths[j].Nodes) > 0 { // assume has anchor child
-				m := make(map[string]string)
 				anchor := ths[j].Nodes[0]
-				for _, a := range anchor.Attrs {
-					m[a.Name.Local] = a.Value
-				}
+				m := collectAttrs(&anchor)
 				if m["href"] == "-" { // if header col has command copy it to row col
 					trs[i].Nodes[j].Nodes = []Node{anchor}
 					trs[i].Nodes[j].Nodes[0].Content = trs[i].Nodes[j].Content
@@ -84,12 +103,56 @@ func processTable(table *Node) {
 	}
 }
 
-func normaliseCommands(node *Node) {
+func attr(name string, val string) xml.Attr {
+	return xml.Attr{
+		Name: xml.Name{
+			Local: name,
+		},
+		Value: val,
+	}
+}
+
+func processListStrings(ul *Node) {
+	lis := ul.Nodes            // ul>li
+	if len(lis[0].Nodes) > 0 { // assume command exists
+		anchor := lis[0].Nodes[0]
+		lis[0].Content = anchor.Content
+		m := collectAttrs(&anchor)
+		for i := range lis { // for each row
+			lis[i].Nodes = []Node{{
+				XMLName: anchor.XMLName,
+				Attrs:   []xml.Attr{attr("href", "-"), attr("title", fmt.Sprintf("%s[%d]", m["title"], i))},
+				Content: lis[i].Content,
+				Nodes:   nil,
+			}}
+			lis[i].Content = ""
+		}
+	}
+}
+
+var verifyRows = false
+
+func preProcess(node *Node) {
+	verifyRowsCalled := verifyRows
+	verifyRows = false
 	if node.elem() == "table" {
-		processTable(node)
+		if verifyRowsCalled {
+			//TODO
+		} else {
+			processTable(node)
+		}
+	} else if node.elem() == "ul" && verifyRowsCalled {
+		processListStrings(node)
+	} else if node.elem() == "a" { // check for directives
+		m := collectAttrs(node)
+		if m["title"] == "!VerifyRows" {
+			verifyRows = true
+			node.Attrs = nil // consume directive
+			node.XMLName.Local = "span"
+		}
 	} else {
 		for i := range node.Nodes {
-			normaliseCommands(&(node.Nodes[i]))
+			preProcess(&(node.Nodes[i]))
 		}
 	}
 }
@@ -126,12 +189,18 @@ func processCommands(f *fixtureContext, commands *[]Command) []string {
 			genericVal := f.evalVar(instr[1:len(instr)])
 			command.echo(fmt.Sprint(genericVal))
 
-		} else if strings.HasSuffix(instr, ")") {
+		} else if strings.HasSuffix(instr, ")") && strings.Contains(instr, "=") {
 			// var assignment, method call
 			varName := strings.TrimSpace(instr[0:strings.Index(instr, "=")])
 			methodCall := strings.TrimSpace(instr[strings.Index(instr, "=")+1 : len(instr)])
 			strValue := callMethod(f, methodCall, command.getTextVal())
 			f.putVar(varName, strValue)
+			command.restyle()
+
+		} else if strings.HasSuffix(instr, ")") {
+			// method call, no var assignment (fixture side-effect)
+			methodCall := strings.TrimSpace(instr[strings.Index(instr, "=")+1 : len(instr)])
+			callMethod(f, methodCall, command.getTextVal())
 			command.restyle()
 
 		} else {

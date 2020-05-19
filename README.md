@@ -63,7 +63,8 @@ See table examples in the `examples` directory.
 ## Notes
 
 ### specifications
-* strict markdown tables: at most a single command per column; no column should be dependent on any column to its right
+* commands processed via depth-first traversal (e.g. vars can only be used after setting, never before)
+* strict markdown tables: at most a single command per column; column commands processed left to right
 * empty link text currently require a single space (e.g. use `[ ]` not `[]`)
 * echo command uses a `$` prefix (not `c:echo=`)
 * assert command uses a `?` prefix (not `?=`)
@@ -72,4 +73,5 @@ See table examples in the `examples` directory.
 * params for method calls bound as strings; please do conversion as per need inside fixture methods
 
 ### fixtures
+* fixture methods required to return a value, current limitation
 * struct properties to assert on must be exported (dependent on json marshal behaviour)

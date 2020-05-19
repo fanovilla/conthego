@@ -6,6 +6,7 @@ import (
 	"github.com/gomarkdown/markdown"
 	"io/ioutil"
 	"os"
+	"runtime/debug"
 	"testing"
 
 	//"os"
@@ -17,6 +18,7 @@ func RunSpec(t *testing.T, internalFixture interface{}) {
 	// https://blog.golang.org/defer-panic-and-recover
 	defer func() {
 		if r := recover(); r != nil {
+			debug.PrintStack()
 			t.Fatal(fmt.Sprint(r))
 		}
 	}()
@@ -36,7 +38,7 @@ func RunSpec(t *testing.T, internalFixture interface{}) {
 
 func runCommands(rootNode *Node, f *fixtureContext) {
 	commands := make([]Command, 0)
-	normaliseCommands(rootNode)
+	preProcess(rootNode)
 	collectCommands(rootNode, &commands)
 	reportLines := processCommands(f, &commands)
 
