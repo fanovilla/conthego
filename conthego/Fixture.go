@@ -6,6 +6,7 @@ import (
 	"github.com/joeycumines/go-dotnotation/dotnotation"
 	"strings"
 	"testing"
+	"time"
 )
 
 type fixtureContext struct {
@@ -93,7 +94,8 @@ func normaliseCommands(node *Node) {
 	}
 }
 
-func processCommands(f *fixtureContext, commands *[]Command) {
+func processCommands(f *fixtureContext, commands *[]Command) []string {
+	var reportLines []string
 	for i := range *commands {
 		command := (*commands)[i]
 		instr := command.instruction
@@ -101,6 +103,7 @@ func processCommands(f *fixtureContext, commands *[]Command) {
 			// directive
 			if "ExpectedToFail" == instr[1:len(instr)] {
 				f.expectedToFail = true
+				reportLines = append(reportLines, "This specification is ExpectedToFail")
 			}
 
 		} else if instr[0] == '?' && strings.HasSuffix(instr, ")") {
@@ -137,4 +140,7 @@ func processCommands(f *fixtureContext, commands *[]Command) {
 			command.restyle()
 		}
 	}
+
+	reportLines = append(reportLines, "Generated "+time.Now().Format(time.RFC1123Z))
+	return reportLines
 }

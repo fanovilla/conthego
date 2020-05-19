@@ -1,6 +1,7 @@
 package conthego
 
 import (
+	"encoding/xml"
 	"fmt"
 	"github.com/gomarkdown/markdown"
 	"io/ioutil"
@@ -26,15 +27,24 @@ func RunSpec(t *testing.T, internalFixture interface{}) {
 	html := markdown.ToHTML(content, nil, nil)
 
 	rootNode := unmarshal(html)
-	commands := make([]Command, 0)
-	normaliseCommands(rootNode)
-	collectCommands(rootNode, &commands)
-	processCommands(f, &commands)
+	runCommands(rootNode, f)
 
 	bytes := marshal(rootNode)
 	fmt.Println(string(bytes))
-
 	writeFile(baseName, bytes)
+}
+
+func runCommands(rootNode *Node, f *fixtureContext) {
+	commands := make([]Command, 0)
+	normaliseCommands(rootNode)
+	collectCommands(rootNode, &commands)
+	reportLines := processCommands(f, &commands)
+
+	reportNode := Node{xml.Name{Local: "div"}, []xml.Attr{}, "", []Node{}}
+	for _, s := range reportLines {
+		reportNode.Nodes = append(reportNode.Nodes, Node{xml.Name{Local: "p"}, []xml.Attr{}, s, []Node{}})
+	}
+	rootNode.Nodes[1].Nodes = append(rootNode.Nodes[1].Nodes, reportNode)
 }
 
 func getSpecBaseName() string {
