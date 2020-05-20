@@ -12,6 +12,6 @@ func TestExecute(t *testing.T) {
 type FixtureExecute struct {
 }
 
-func (f FixtureExecute) GetPersonalisedGreeting(name string) string {
+func (f *FixtureExecute) GetPersonalisedGreeting(name string) string {
 	return "Hello " + name + "!"
 }

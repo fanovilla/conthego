@@ -1,7 +1,6 @@
 # BACKLOG
 
 ## WIP
-* verify table rows as list of structs
 * fail unmatched on verify list of strings or structs
 * echo list
 * echo map

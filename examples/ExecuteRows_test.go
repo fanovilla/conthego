@@ -13,7 +13,7 @@ func TestExecuteRows(t *testing.T) {
 type FixtureExecuteRows struct {
 }
 
-func (f FixtureExecuteRows) Split(name string) Name {
+func (f *FixtureExecuteRows) Split(name string) Name {
 	split := strings.Split(name, " ")
 	return Name{split[0], split[1]}
 }

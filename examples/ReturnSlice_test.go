@@ -9,16 +9,15 @@ func TestReturnSlice(t *testing.T) {
 	conthego.RunSpec(t, &FixtureReturnSlice{})
 }
 
-var list *[]string
-
 type FixtureReturnSlice struct {
+	list *[]string
 }
 
-func (f FixtureReturnSlice) BuildList() []string {
-	list = &[]string{"Carl", "Ryan", "Liam"}
-	return *list
+func (f *FixtureReturnSlice) BuildList() []string {
+	f.list = &[]string{"Carl", "Ryan", "Liam"}
+	return *f.list
 }
 
-func (f FixtureReturnSlice) GetFirstEntry() string {
-	return (*list)[0]
+func (f *FixtureReturnSlice) GetFirstEntry() string {
+	return (*f.list)[0]
 }

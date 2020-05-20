@@ -35,10 +35,13 @@ func (f fixtureContext) getVar(name string) interface{} {
 }
 
 func (f fixtureContext) evalVar(rawVar string) interface{} {
-	if strings.HasSuffix(rawVar, "]") { // simple indexed
+	if strings.Contains(rawVar, "]") { // simple indexed
 		open := strings.Index(rawVar, "[")
 		close := strings.Index(rawVar, "]")
 		rawVal := f.getVar(rawVar[0:open])
+		if rawVal == nil {
+			return "eval of " + rawVar[0:open] + " returned nil"
+		}
 		index, err := strconv.Atoi(rawVar[open+1 : close])
 		if err != nil {
 			panic(err)
@@ -47,13 +50,19 @@ func (f fixtureContext) evalVar(rawVar string) interface{} {
 		switch reflect.TypeOf(rawVal).Kind() {
 		case reflect.Slice:
 			s := reflect.ValueOf(rawVal)
-			return formatAtom(s.Index(index))
+			rawValAtIndex := formatAtom(s.Index(index))
+			if strings.Contains(rawVar, ".") {
+				keyString := rawVar[strings.Index(rawVar, ".")+1:]
+				content, _ := dotnotation.Get(rawValAtIndex, keyString)
+				return content
+			}
+			return rawValAtIndex
 		}
 		return "invalid index " + rawVar
 
 	} else if strings.Contains(rawVar, ".") { // dot-notation
 		rawVal := f.getVar(rawVar[0:strings.Index(rawVar, ".")])
-		keyString := rawVar[strings.Index(rawVar, ".")+1 : len(rawVar)]
+		keyString := rawVar[strings.Index(rawVar, ".")+1:]
 		content, _ := dotnotation.Get(rawVal, keyString)
 		return content
 	} else {
@@ -83,23 +92,64 @@ func collectAttrs(anchor *Node) map[string]string {
 func processTable(table *Node) {
 	ths := table.Nodes[0].Nodes[0].Nodes // table>thead>tr>th
 	trs := table.Nodes[1].Nodes          // table>tbody>tr
-	for i := range trs {                 // for each row
-		for j := range ths { // for each header col
-			if len(ths[j].Nodes) > 0 { // assume has anchor child
-				anchor := ths[j].Nodes[0]
-				m := collectAttrs(&anchor)
-				if m["href"] == "-" { // if header col has command copy it to row col
-					trs[i].Nodes[j].Nodes = []Node{anchor}
-					trs[i].Nodes[j].Nodes[0].Content = trs[i].Nodes[j].Content
-					trs[i].Nodes[j].Content = ""
+	for i := range ths {                 // for each header col
+		if len(ths[i].Nodes) > 0 { // assume has anchor child
+			anchor := &(ths[i].Nodes[0])
+			m := collectAttrs(anchor)
+			if m["href"] == "-" { // if header col has command copy it to row col
+				for j := range trs { // for each row
+					trs[j].Nodes[i].Nodes = []Node{*anchor}
+					trs[j].Nodes[i].Nodes[0].Content = trs[j].Nodes[i].Content
+					trs[j].Nodes[i].Content = ""
 				}
+				removeAnchor(anchor)
 			}
 		}
 	}
-	for j := range ths { // for each header col
-		if len(ths[j].Nodes) > 0 { // assume has anchor child
-			ths[j].Nodes[0].Attrs = []xml.Attr{}
+}
+
+func processTableStructs(table *Node) {
+	ths := table.Nodes[0].Nodes[0].Nodes // table>thead>tr>th
+	trs := table.Nodes[1].Nodes          // table>tbody>tr
+	for i := range ths {                 // for each header col
+		if len(ths[i].Nodes) > 0 { // assume has anchor child
+			anchor := &(ths[i].Nodes[0])
+			m := collectAttrs(anchor)
+			if m["href"] == "-" { // if header col has command copy it to row col
+				rawTitle := m["title"]
+				dotPos := strings.Index(rawTitle, ".")
+				if dotPos >= 0 {
+					pre := rawTitle[0:dotPos]
+					post := rawTitle[dotPos:len(rawTitle)]
+					for j := range trs { // for each row
+						a := newAnchor(trs[j].Nodes[i].Content, fmt.Sprintf("%s[%d]%s", pre, j, post))
+						trs[j].Nodes[i].Nodes = []Node{*a}
+						trs[j].Nodes[i].Content = ""
+					}
+				}
+				removeAnchor(anchor)
+			}
 		}
+	}
+}
+
+func newAnchor(content string, title string) *Node {
+	hrefAttr := attr("href", "-")
+	titleAttr := attr("title", title)
+	return &Node{
+		XMLName: xml.Name{
+			Local: "a",
+		},
+		Attrs:   []xml.Attr{hrefAttr, titleAttr},
+		Content: content,
+		Nodes:   nil,
+	}
+}
+
+func removeAnchor(node *Node) { // remove command that was consumed at pre-process step
+	if node.XMLName.Local == "a" {
+		node.XMLName.Local = "span"
+		node.Attrs = nil
 	}
 }
 
@@ -119,12 +169,8 @@ func processListStrings(ul *Node) {
 		lis[0].Content = anchor.Content
 		m := collectAttrs(&anchor)
 		for i := range lis { // for each row
-			lis[i].Nodes = []Node{{
-				XMLName: anchor.XMLName,
-				Attrs:   []xml.Attr{attr("href", "-"), attr("title", fmt.Sprintf("%s[%d]", m["title"], i))},
-				Content: lis[i].Content,
-				Nodes:   nil,
-			}}
+			a := newAnchor(lis[i].Content, fmt.Sprintf("%s[%d]", m["title"], i))
+			lis[i].Nodes = []Node{*a}
 			lis[i].Content = ""
 		}
 	}
@@ -133,15 +179,15 @@ func processListStrings(ul *Node) {
 var verifyRows = false
 
 func preProcess(node *Node) {
-	verifyRowsCalled := verifyRows
+	singleUseVerifyRows := verifyRows
 	verifyRows = false
 	if node.elem() == "table" {
-		if verifyRowsCalled {
-			//TODO
+		if singleUseVerifyRows {
+			processTableStructs(node)
 		} else {
 			processTable(node)
 		}
-	} else if node.elem() == "ul" && verifyRowsCalled {
+	} else if node.elem() == "ul" && singleUseVerifyRows {
 		processListStrings(node)
 	} else if node.elem() == "a" { // check for directives
 		m := collectAttrs(node)

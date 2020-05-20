@@ -12,11 +12,6 @@ func TestReturnStruct(t *testing.T) {
 type FixtureReturnStruct struct {
 }
 
-type Name struct {
-	First string
-	Last  string
-}
-
 func (f FixtureReturnStruct) BuildName() Name {
 	return Name{"Ryan", "Liam"}
 }

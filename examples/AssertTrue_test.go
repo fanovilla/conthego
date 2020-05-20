@@ -12,6 +12,6 @@ func TestAssertTrue(t *testing.T) {
 type FixtureAssertTrue struct {
 }
 
-func (f FixtureAssertTrue) HowAreYou() bool {
+func (f *FixtureAssertTrue) HowAreYou() bool {
 	return true
 }

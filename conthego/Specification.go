@@ -39,6 +39,10 @@ func RunSpec(t *testing.T, internalFixture interface{}) {
 func runCommands(rootNode *Node, f *fixtureContext) {
 	commands := make([]Command, 0)
 	preProcess(rootNode)
+
+	bytes := marshal(rootNode)
+	fmt.Println("after pre-processing:" + string(bytes))
+
 	collectCommands(rootNode, &commands)
 	reportLines := processCommands(f, &commands)
 

@@ -16,7 +16,7 @@ type Vertex struct {
 	Lat, Long float64
 }
 
-func (f FixtureReturnMap) BuildLocationMap() map[string]Vertex {
+func (f *FixtureReturnMap) BuildLocationMap() map[string]Vertex {
 	return map[string]Vertex{
 		"BellLabs": Vertex{
 			40.68433, -74.39967,

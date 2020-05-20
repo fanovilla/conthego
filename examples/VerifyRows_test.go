@@ -12,19 +12,18 @@ func TestVerifyRows(t *testing.T) {
 }
 
 type FixtureVerifyRows struct {
+	users []string
 }
 
-var users []string
-
-func (f FixtureVerifyRows) SetUpUser(user string) []string {
-	users = append(users, user)
-	return users
+func (f *FixtureVerifyRows) SetUpUser(user string) []string {
+	f.users = append(f.users, user)
+	return f.users
 }
 
-func (f FixtureVerifyRows) SearchString(search string) []string {
+func (f *FixtureVerifyRows) SearchString(search string) []string {
 	var results []string
 
-	for _, s := range users {
+	for _, s := range f.users {
 		if strings.Contains(s, search) {
 			results = append(results, s)
 		}

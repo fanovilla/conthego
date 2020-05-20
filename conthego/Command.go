@@ -14,7 +14,7 @@ type Command struct {
 }
 
 func (c Command) echo(value string) {
-	c.node.Content = value
+	c.node.Content += value
 	styleNode(c.node, "")
 }
 
@@ -22,8 +22,14 @@ func (c Command) getTextVal() string {
 	return c.node.Content
 }
 
-func (c Command) success() {
-	styleNode(c.node, "success")
+func (c Command) success(f *fixtureContext) {
+	if f.expectedToFail {
+		styleNode(c.node, "failure")
+		c.node.Content = fmt.Sprintf("%s (assert OK but expected to fail)", c.node.Content)
+		f.t.Fail()
+	} else {
+		styleNode(c.node, "success")
+	}
 }
 
 func (c Command) restyle() {
@@ -60,20 +66,20 @@ func (c Command) assert(f *fixtureContext, val interface{}) {
 		c.failure(f, "nil")
 	} else if actual, ok := val.(bool); ok {
 		if actual {
-			c.success()
+			c.success(f)
 		} else {
 			c.failure(f, "false")
 		}
 	} else if actual, ok := val.(float64); ok {
 		actualStr := strconv.FormatFloat(actual, 'f', -1, 64)
 		if c.node.Content == actualStr {
-			c.success()
+			c.success(f)
 		} else {
 			c.failure(f, actualStr)
 		}
 	} else if actual, ok := val.(string); ok {
 		if c.node.Content == actual {
-			c.success()
+			c.success(f)
 		} else {
 			c.failure(f, actual)
 		}

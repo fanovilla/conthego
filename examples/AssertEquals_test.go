@@ -12,14 +12,14 @@ func TestAssertEquals(t *testing.T) {
 type FixtureAssertEquals struct {
 }
 
-func (f FixtureAssertEquals) GetGreeting() string {
+func (f *FixtureAssertEquals) GetGreeting() string {
 	return "Hello World!"
 }
 
-func (f FixtureAssertEquals) GetPersonalisedGreeting(name string) string {
+func (f *FixtureAssertEquals) GetPersonalisedGreeting(name string) string {
 	return "Hello " + name + "!"
 }
 
-func (f FixtureAssertEquals) GetMultipleGreeting(name1 string, name2 string) string {
+func (f *FixtureAssertEquals) GetMultipleGreeting(name1 string, name2 string) string {
 	return "Hello " + name1 + " and " + name2 + "!"
 }

@@ -12,10 +12,10 @@ func TestEcho(t *testing.T) {
 type FixtureEcho struct {
 }
 
-func (f FixtureEcho) GetGreeting() string {
+func (f *FixtureEcho) GetGreeting() string {
 	return "Hello World!"
 }
 
-func (f FixtureEcho) GetPersonalisedGreeting(name string) string {
+func (f *FixtureEcho) GetPersonalisedGreeting(name string) string {
 	return "Hello " + name + "!"
 }
