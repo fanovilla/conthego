@@ -3,14 +3,18 @@
 ## WIP
 * nicer examples
 * fail unmatched on verify list of strings or structs
-* echo list
-* echo map
 
 ## QUEUE
-* failure stacktrace
 * reporting - index page
-* build
+* github build
+* github publish built specs
+* failure stacktrace
+* example embed image
+* example embed preformatted json
+* echo list
+* echo map
 * versioning - https://github.com/golang/go/wiki/Modules
+* example embed charts (directive to include script src headers?)
 * injectable css
 * param literal
 * big decimal binding?
