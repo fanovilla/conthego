@@ -37,7 +37,7 @@ func marshal(rootNode *Node) []byte {
 
 func unmarshal(html []byte) *Node {
 	rootNode := Node{}
-	style := "<style>.success {background-color: #afa;} .failure {background-color: #ffb0b0;}</style>"
+	style := "<link href=\"embedded.css\" rel=\"stylesheet\"/>"
 	err := xml.Unmarshal([]byte(fmt.Sprintf("<html><header>%s</header><body>%s</body></html>", style, html)), &rootNode)
 	if err != nil {
 		panic(err)
