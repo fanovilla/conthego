@@ -1,6 +1,6 @@
 # Concordion On The Go
 
-A lightweight, opinionated implementation of a Specification By Example (SBE) framework in golang.
+Conthego. A lightweight implementation of a Specification By Example (SBE) framework in [go](https://golang.org/).
 Inspired by [concordion.org](https://concordion.org).
 
 ## Usage
@@ -56,7 +56,7 @@ assert-true or assert-equals
 [World](- "?var1.prop")
 
 directives
-[ ](- "!expectedtofail")
+[ ](- "!ExpectedToFail")
 
 ```
 
