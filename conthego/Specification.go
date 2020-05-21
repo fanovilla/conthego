@@ -48,7 +48,7 @@ func runCommands(rootNode *Node, f *fixtureContext) {
 
 	reportNode := Node{xml.Name{Local: "div"}, []xml.Attr{}, "", []Node{}}
 	for _, s := range reportLines {
-		reportNode.Nodes = append(reportNode.Nodes, Node{xml.Name{Local: "p"}, []xml.Attr{}, s, []Node{}})
+		reportNode.Nodes = append(reportNode.Nodes, Node{xml.Name{Local: "p"}, []xml.Attr{attr("class", "footer")}, s, []Node{}})
 	}
 	rootNode.Nodes[1].Nodes = append(rootNode.Nodes[1].Nodes, reportNode)
 }
