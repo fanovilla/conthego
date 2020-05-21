@@ -6,20 +6,20 @@ import (
 )
 
 func TestAssertEquals(t *testing.T) {
-	conthego.RunSpec(t, &FixtureAssertEquals{})
+	conthego.RunSpec(t, &AssertEqualsFixture{})
 }
 
-type FixtureAssertEquals struct {
+type AssertEqualsFixture struct {
 }
 
-func (f *FixtureAssertEquals) GetGreeting() string {
+func (f *AssertEqualsFixture) GetGreeting() string {
 	return "Hello World!"
 }
 
-func (f *FixtureAssertEquals) GetPersonalisedGreeting(name string) string {
+func (f *AssertEqualsFixture) GetPersonalisedGreeting(name string) string {
 	return "Hello " + name + "!"
 }
 
-func (f *FixtureAssertEquals) GetMultipleGreeting(name1 string, name2 string) string {
+func (f *AssertEqualsFixture) GetMultipleGreeting(name1 string, name2 string) string {
 	return "Hello " + name1 + " and " + name2 + "!"
 }

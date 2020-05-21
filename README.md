@@ -17,18 +17,20 @@ Sample specification `AssertEquals.md`
 Sample fixture `AssertEquals_test.go`
 ```go
 func TestAssertEquals(t *testing.T) {
-	conthego.RunSpec(t, &FixtureAssertEquals{})
+    conthego.RunSpec(t, &AssertEqualsFixture{})
 }
 
-type FixtureAssertEquals struct {
+type AssertEqualsFixture struct {
 }
 
-func (f FixtureAssertEquals) GetGreeting() string {
-	return "Hello World!"
+func (f *AssertEqualsFixture) GetGreeting() string {
+    return "Hello World!"
 }
 ```
 
 ## Supported Commands
+
+* [assert equals](examples/AssertEquals.md)
 
 ```
 set
@@ -45,7 +47,7 @@ exec
 [Blah](- "var1=Hello(TEXT)")
 [ ](- "var2=Hello(var1)")
 
-isTrue or assertEquals
+assertTrue or assertEquals
 [World](- "?Hello()")
 [World](- "?var1")
 [World](- "?var1.prop")
