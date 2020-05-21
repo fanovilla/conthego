@@ -32,6 +32,8 @@ func (f *AssertEqualsFixture) GetGreeting() string {
 
 * [assert-equals](examples/AssertEquals.md)
 * [assert-true](examples/AssertTrue.md)
+* [set](examples/SetAndEcho.md)
+* [echo](examples/SetAndEcho.md)
 
 ```
 set
@@ -48,7 +50,7 @@ exec
 [Blah](- "var1=Hello(TEXT)")
 [ ](- "var2=Hello(var1)")
 
-assertTrue or assertEquals
+assert-true or assert-equals
 [World](- "?Hello()")
 [World](- "?var1")
 [World](- "?var1.prop")

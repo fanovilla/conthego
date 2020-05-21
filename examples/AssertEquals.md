@@ -1,7 +1,9 @@
 # assert-equals command
 
-
 ## overview
+
+The assert-equals command gets invoked by the `?` command prefix.
+
 Create a spec file AssertEquals.md containing:
 
 ```markdown
