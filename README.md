@@ -30,7 +30,8 @@ func (f *AssertEqualsFixture) GetGreeting() string {
 
 ## Supported Commands
 
-* [assert equals](examples/AssertEquals.md)
+* [assert-equals](examples/AssertEquals.md)
+* [assert-true](examples/AssertTrue.md)
 
 ```
 set

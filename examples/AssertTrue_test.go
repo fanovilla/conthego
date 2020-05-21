@@ -6,12 +6,16 @@ import (
 )
 
 func TestAssertTrue(t *testing.T) {
-	conthego.RunSpec(t, &FixtureAssertTrue{})
+	conthego.RunSpec(t, &AssertTrueFixture{})
 }
 
-type FixtureAssertTrue struct {
+type AssertTrueFixture struct {
 }
 
-func (f *FixtureAssertTrue) HowAreYou() bool {
+func (f *AssertTrueFixture) IsTheWorldRound() bool {
 	return true
+}
+
+func (f *AssertTrueFixture) IsTheWorldFlat() bool {
+	return false
 }
