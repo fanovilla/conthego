@@ -5,7 +5,10 @@
 * fail unmatched on verify list of strings or structs
 
 ## QUEUE
+* CONTRIBUTING.md
 * reporting - index page
+* embed arbitrary html/javascript
+* injectable css
 * github build
 * github publish built specs
 * failure stacktrace
@@ -15,7 +18,6 @@
 * echo map
 * versioning - https://github.com/golang/go/wiki/Modules
 * example embed charts (directive to include script src headers?)
-* injectable css
 * param literal
 * big decimal binding?
 

@@ -16,17 +16,25 @@ Sample specification `AssertEquals.md`
 
 Sample fixture `AssertEquals_test.go`
 ```go
+import (
+	"github.com/fanovilla/conthego/conthego"
+	"testing"
+)
+
 func TestAssertEquals(t *testing.T) {
-    conthego.RunSpec(t, &AssertEqualsFixture{})
+	conthego.RunSpec(t, &AssertEqualsFixture{})
 }
 
 type AssertEqualsFixture struct {
 }
 
 func (f *AssertEqualsFixture) GetGreeting() string {
-    return "Hello World!"
+	return "Hello World!"
 }
 ```
+Sample output:
+
+![output](./examples/images/AssertEquals.png)
 
 ## Supported Commands
 
