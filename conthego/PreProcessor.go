@@ -7,27 +7,9 @@ import (
 	"strings"
 )
 
-var verifyRows = false
-
 func preProcess(node *html.Node) {
-	singleUseVerifyRows := verifyRows
-	verifyRows = false
 	if node.DataAtom == atom.Table {
-		if singleUseVerifyRows {
-			processTableStructs(node)
-		} else {
-			processTable(node)
-		}
-	} else if node.DataAtom == atom.Ul && singleUseVerifyRows {
-		processListStrings(node)
-	} else if node.DataAtom == atom.A { // check for directives
-		m := collectAttrs(node)
-		if m["title"] == "!VerifyRows" {
-			verifyRows = true
-			node.Attr = nil // consume directive
-			node.DataAtom = atom.Span
-			node.Data = "span"
-		}
+		processTable(node)
 	} else {
 		for c := node.FirstChild; c != nil; c = c.NextSibling {
 			preProcess(c)
@@ -69,6 +51,25 @@ func isCommand(n *html.Node) bool {
 
 func processTable(table *html.Node) {
 	theadTr := child(child(table, atom.Thead), atom.Tr)
+	ths := children(theadTr, atom.Th) // table>thead>tr>th
+	for i := range ths {              // for each header col
+		anchor := child(ths[i], atom.A) // find first command and check presence of iterator ":"
+		if anchor != nil {
+			instr := collectAttrs(anchor)["title"]
+			if isCommand(anchor) && strings.Contains(instr, ":") {
+				anchor.Parent.RemoveChild(anchor)
+				anchor.Attr = []html.Attribute{attr("href", "-"), attr("title", strings.ReplaceAll(instr, ":", "="))}
+				table.Parent.InsertBefore(anchor, table) //hoist up the iterator command; for convenience
+				processTableStructs(table)
+			} else {
+				processTablePerRow(table)
+			}
+		}
+	}
+}
+
+func processTablePerRow(table *html.Node) {
+	theadTr := child(child(table, atom.Thead), atom.Tr)
 	ths := children(theadTr, atom.Th)                  // table>thead>tr>th
 	trs := children(child(table, atom.Tbody), atom.Tr) // table>tbody>tr
 	for j := range trs {                               // for each row
@@ -106,8 +107,12 @@ func processTableStructs(table *html.Node) {
 					pre := rawTitle[0:dotPos]
 					post := rawTitle[dotPos:len(rawTitle)]
 					textNode := textNode(tds[i])
-					tds[i].AppendChild(newAnchor(textNode.Data, fmt.Sprintf("%s[%d]%s", pre, j, post)))
-					textNode.Parent.RemoveChild(textNode)
+					text := ""
+					if textNode != nil {
+						text = textNode.Data
+						textNode.Parent.RemoveChild(textNode)
+					}
+					tds[i].AppendChild(newAnchor(text, fmt.Sprintf("%s[%d]%s", pre, j, post)))
 				}
 			}
 		}
@@ -150,18 +155,4 @@ func attr(key string, val string) html.Attribute {
 		Key: key,
 		Val: val,
 	}
-}
-
-func processListStrings(ul *html.Node) {
-	//lis := ul.Nodes            // ul>li
-	//if len(lis[0].Nodes) > 0 { // assume command exists
-	//	anchor := lis[0].Nodes[0]
-	//	lis[0].Content = anchor.Content
-	//	m := collectAttrs(&anchor)
-	//	for i := range lis { // for each row
-	//		a := newAnchor(lis[i].Content, fmt.Sprintf("%s[%d]", m["title"], i))
-	//		lis[i].Nodes = []Node{*a}
-	//		lis[i].Content = ""
-	//	}
-	//}
 }

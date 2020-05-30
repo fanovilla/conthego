@@ -50,15 +50,16 @@ func (f fixtureContext) evalVar(rawVar string) interface{} {
 		switch reflect.TypeOf(rawVal).Kind() {
 		case reflect.Slice:
 			s := reflect.ValueOf(rawVal)
-			rawValAtIndex := formatAtom(s.Index(index))
-			if strings.Contains(rawVar, ".") {
-				keyString := rawVar[strings.Index(rawVar, ".")+1:]
-				content, _ := dotnotation.Get(rawValAtIndex, keyString)
-				return content
+			if index <= s.Len()-1 {
+				rawValAtIndex := formatAtom(s.Index(index))
+				if strings.Contains(rawVar, ".") {
+					keyString := rawVar[strings.Index(rawVar, ".")+1:]
+					content, _ := dotnotation.Get(rawValAtIndex, keyString)
+					return content
+				}
+				return rawValAtIndex
 			}
-			return rawValAtIndex
 		}
-		return "invalid index " + rawVar
 
 	} else if strings.Contains(rawVar, ".") { // dot-notation
 		rawVal := f.getVar(rawVar[0:strings.Index(rawVar, ".")])
@@ -68,6 +69,7 @@ func (f fixtureContext) evalVar(rawVar string) interface{} {
 	} else {
 		return f.getVar(rawVar)
 	}
+	return "(nil)"
 }
 
 func collectCommands(node *html.Node, commands *[]Command) {
@@ -133,6 +135,13 @@ func processCommands(f *fixtureContext, commands *[]Command) []string {
 			// method call, no var assignment (fixture side-effect)
 			methodCall := strings.TrimSpace(instr[strings.Index(instr, "=")+1 : len(instr)])
 			callMethod(f, methodCall, command.getTextVal())
+			command.restyle()
+
+		} else if strings.Contains(instr, "=") {
+			// var re-assignment
+			varName := strings.TrimSpace(instr[0:strings.Index(instr, "=")])
+			fromVar := strings.TrimSpace(instr[strings.Index(instr, "=")+1 : len(instr)])
+			f.putVar(varName, f.getVar(fromVar))
 			command.restyle()
 
 		} else {

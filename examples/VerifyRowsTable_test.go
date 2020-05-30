@@ -19,12 +19,14 @@ func (f *FixtureVerifyRowsTable) SetUpUser(user string) []string {
 	return f.users
 }
 
-func (f *FixtureVerifyRowsTable) BreakDownNames() []Name {
+func (f *FixtureVerifyRowsTable) BreakDownNamesWith(search string) []Name {
 	var names []Name
 
 	for _, s := range f.users {
-		splits := strings.Split(s, ".")
-		names = append(names, Name{splits[0], splits[1]})
+		if strings.Contains(s, search) {
+			splits := strings.Split(s, ".")
+			names = append(names, Name{splits[0], splits[1]})
+		}
 	}
 	return names
 }
