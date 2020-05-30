@@ -134,6 +134,11 @@ func processCommands(f *fixtureContext, commands *[]Command) []string {
 		} else if instr[0] == '$' {
 			processEcho(f, &command, instr)
 
+		} else if instr[0] == '#' {
+			// assert count
+			genericVal := f.evalVar(instr[1:])
+			command.assertCount(f, genericVal)
+
 		} else if strings.HasSuffix(instr, ")") && strings.Contains(instr, "=") {
 			// var assignment, method call
 			varName := strings.TrimSpace(instr[0:strings.Index(instr, "=")])

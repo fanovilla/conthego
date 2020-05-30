@@ -31,7 +31,26 @@ func RunSpec(t *testing.T, internalFixture interface{}) {
 	html := markdown.ToHTML(content, nil, nil)
 
 	rootNode := unmarshalSpec(html)
+
+	defer func() {
+		if r := recover(); r != nil {
+			appendStack(rootNode, baseName, fmt.Sprint(r))
+			debug.PrintStack()
+			t.Fatal(fmt.Sprint(r))
+		}
+	}()
+
 	runCommands(rootNode, f)
+
+	bytes := marshalSpec(rootNode)
+	fmt.Println(string(bytes))
+	writeFile(baseName, bytes)
+}
+
+func appendStack(rootNode *html.Node, baseName string, stack string) {
+	stackNode := html.Node{Type: html.ElementNode, DataAtom: atom.Div, Data: "pre", Attr: []html.Attribute{attr("class", "failure")}}
+	stackNode.AppendChild(&html.Node{Type: html.TextNode, Data: string(debug.Stack())})
+	child(rootNode.FirstChild, atom.Body).AppendChild(&stackNode)
 
 	bytes := marshalSpec(rootNode)
 	fmt.Println(string(bytes))

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
+	"reflect"
 	"strconv"
 )
 
@@ -60,6 +61,20 @@ func styleNode(node *html.Node, class string) {
 	}
 	node.DataAtom = atom.Span
 	node.Data = "span"
+}
+
+func (c Command) assertCount(f *fixtureContext, val interface{}) {
+	if reflect.TypeOf(val).Kind() == reflect.Slice {
+		s := reflect.ValueOf(val)
+		actualStr := strconv.Itoa(s.Len())
+		if c.node.FirstChild.Data == actualStr {
+			c.success(f)
+		} else {
+			c.failure(f, actualStr)
+		}
+	} else {
+		c.failure(f, "error; can only count items from a slice var")
+	}
 }
 
 func (c Command) assert(f *fixtureContext, val interface{}) {

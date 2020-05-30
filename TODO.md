@@ -2,25 +2,19 @@
 
 ## WIP
 * nicer examples
-* fail unmatched on verify list of strings or structs
 
 ## QUEUE
 * CONTRIBUTING.md
 * reporting - index page
-* embed arbitrary html/javascript
 * injectable css
 * github build
 * github publish built specs
-* failure stacktrace
-* example embed image
-* example embed preformatted json
 * echo list
-* echo map
+* verify-rows - display unmatched 
 * versioning - https://github.com/golang/go/wiki/Modules
-* example embed charts (directive to include script src headers?)
-* param literal
 * big decimal binding?
 
 ## DISCARDED
 * no clobber existing styles - only useful for html (not markdown) source specs
 * multiple independent examples in spec
+* param literal

@@ -50,7 +50,11 @@ func isCommand(n *html.Node) bool {
 }
 
 func processTable(table *html.Node) {
-	theadTr := child(child(table, atom.Thead), atom.Tr)
+	thead := child(table, atom.Thead)
+	if thead == nil {
+		return
+	}
+	theadTr := child(thead, atom.Tr)
 	ths := children(theadTr, atom.Th) // table>thead>tr>th
 	for i := range ths {              // for each header col
 		anchor := child(ths[i], atom.A) // find first command and check presence of iterator ":"
@@ -60,7 +64,7 @@ func processTable(table *html.Node) {
 				anchor.Parent.RemoveChild(anchor)
 				anchor.Attr = []html.Attribute{attr("href", "-"), attr("title", strings.ReplaceAll(instr, ":", "="))}
 				table.Parent.InsertBefore(anchor, table) //hoist up the iterator command; for convenience
-				processTableStructs(table)
+				processTableStructs(table, instr[:strings.Index(instr, ":")])
 			} else {
 				processTablePerRow(table)
 			}
@@ -91,7 +95,7 @@ func processTablePerRow(table *html.Node) {
 	}
 }
 
-func processTableStructs(table *html.Node) {
+func processTableStructs(table *html.Node, loopVar string) {
 	theadTr := child(child(table, atom.Thead), atom.Tr)
 	ths := children(theadTr, atom.Th)                  // table>thead>tr>th
 	trs := children(child(table, atom.Tbody), atom.Tr) // table>tbody>tr
@@ -117,6 +121,10 @@ func processTableStructs(table *html.Node) {
 			}
 		}
 	}
+
+	rowMatcher := newAnchor(fmt.Sprintf("%d", len(trs)), "#"+loopVar)
+	table.Parent.InsertBefore(rowMatcher, table.NextSibling)
+
 	for i := range ths { // for each header col
 		anchor := child(ths[i], atom.A)
 		if isCommand(anchor) {
