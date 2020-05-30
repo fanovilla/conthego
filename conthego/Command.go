@@ -14,10 +14,16 @@ type Command struct {
 	styles      string
 }
 
-func (c Command) echo(value string) {
-	textNode := textNode(c.node)
-	textNode.Data += value
-	styleNode(c.node, "")
+func (c Command) echo(value string, raw bool) {
+	if raw {
+		styleNode(c.node, "")
+		n := html.Node{Type: html.RawNode, Data: value}
+		c.node.Parent.InsertBefore(&n, c.node)
+	} else {
+		textNode := textNode(c.node)
+		textNode.Data += value
+		styleNode(c.node, "")
+	}
 }
 
 func (c Command) getTextVal() string {

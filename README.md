@@ -52,6 +52,8 @@ echo
 [ ](- "$var1.prop2")
 [ ](- "$Hello()")
 [ ](- "$Hello(var1)")
+[ ](- "$$rawHtmlToEmbed")
+
 
 exec
 [ ](- "Hello()")
@@ -77,13 +79,13 @@ See table examples in the `examples` directory.
 
 ### specifications
 * commands processed via depth-first traversal (e.g. vars can only be used after setting, never before)
-* strict markdown tables: at most a single command per column; column commands processed left to right
+* column commands processed left to right
 * empty link text currently require a single space (e.g. use `[ ]` not `[]`)
 * echo command uses a `$` prefix (not `c:echo=`)
 * assert command uses a `?` prefix (not `?=`)
 * set command uses no prefix (no `#`)
 * params for method calls uses no prefix (no `#`)
-* params for method calls bound as strings; please do conversion as per need inside fixture methods
+* params for method calls bound as strings; please convert as per need in fixture methods
 
 ### fixtures
 * fixture methods required to return a value, current limitation

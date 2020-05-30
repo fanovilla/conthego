@@ -91,6 +91,24 @@ func collectAttrs(anchor *html.Node) map[string]string {
 	return m
 }
 
+func processEcho(f *fixtureContext, command *Command, rawInstr string) {
+	instr := rawInstr[1:]
+	echoRaw := false
+	if rawInstr[1] == '$' {
+		instr = rawInstr[2:]
+		echoRaw = true
+	}
+	if strings.HasSuffix(instr, ")") {
+		// echo method call
+		genericVal := callMethod(f, instr, command.getTextVal())
+		command.echo(fmt.Sprint(genericVal), echoRaw)
+	} else {
+		// echo var
+		genericVal := f.evalVar(instr)
+		command.echo(fmt.Sprint(genericVal), echoRaw)
+	}
+}
+
 func processCommands(f *fixtureContext, commands *[]Command) []string {
 	var reportLines []string
 	for i := range *commands {
@@ -98,30 +116,23 @@ func processCommands(f *fixtureContext, commands *[]Command) []string {
 		instr := command.instruction
 		if instr[0] == '!' {
 			// directive
-			if "ExpectedToFail" == instr[1:len(instr)] {
+			if "ExpectedToFail" == instr[1:] {
 				f.expectedToFail = true
 				reportLines = append(reportLines, "This specification is ExpectedToFail")
 			}
 
 		} else if instr[0] == '?' && strings.HasSuffix(instr, ")") {
 			// assert method call
-			genericVal := callMethod(f, instr[1:len(instr)], command.getTextVal())
+			genericVal := callMethod(f, instr[1:], command.getTextVal())
 			command.assert(f, genericVal)
 
 		} else if instr[0] == '?' {
 			// assert var
-			genericVal := f.evalVar(instr[1:len(instr)])
+			genericVal := f.evalVar(instr[1:])
 			command.assert(f, genericVal)
 
-		} else if instr[0] == '$' && strings.HasSuffix(instr, ")") {
-			// echo method call
-			genericVal := callMethod(f, instr[1:len(instr)], command.getTextVal())
-			command.echo(fmt.Sprint(genericVal))
-
 		} else if instr[0] == '$' {
-			// echo var
-			genericVal := f.evalVar(instr[1:len(instr)])
-			command.echo(fmt.Sprint(genericVal))
+			processEcho(f, &command, instr)
 
 		} else if strings.HasSuffix(instr, ")") && strings.Contains(instr, "=") {
 			// var assignment, method call
