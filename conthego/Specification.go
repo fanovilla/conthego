@@ -1,9 +1,11 @@
 package conthego
 
 import (
-	"encoding/xml"
+	"bytes"
 	"fmt"
 	"github.com/gomarkdown/markdown"
+	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 	"io/ioutil"
 	"os"
 	"runtime/debug"
@@ -28,29 +30,35 @@ func RunSpec(t *testing.T, internalFixture interface{}) {
 	content := readFile(baseName + ".md")
 	html := markdown.ToHTML(content, nil, nil)
 
-	rootNode := unmarshal(html)
+	rootNode := unmarshalSpec(html)
 	runCommands(rootNode, f)
 
-	bytes := marshal(rootNode)
+	bytes := marshalSpec(rootNode)
 	fmt.Println(string(bytes))
 	writeFile(baseName, bytes)
 }
 
-func runCommands(rootNode *Node, f *fixtureContext) {
+func runCommands(rootNode *html.Node, f *fixtureContext) {
 	commands := make([]Command, 0)
 	preProcess(rootNode)
 
-	bytes := marshal(rootNode)
+	bytes := marshalSpec(rootNode)
 	fmt.Println("after pre-processing:" + string(bytes))
 
 	collectCommands(rootNode, &commands)
 	reportLines := processCommands(f, &commands)
 
-	reportNode := Node{xml.Name{Local: "div"}, []xml.Attr{}, "", []Node{}}
+	reportNode := html.Node{Type: html.ElementNode, DataAtom: atom.Div, Data: "div", Attr: []html.Attribute{attr("class", "footer")}}
 	for _, s := range reportLines {
-		reportNode.Nodes = append(reportNode.Nodes, Node{xml.Name{Local: "p"}, []xml.Attr{attr("class", "footer")}, s, []Node{}})
+		reportNode.AppendChild(newParagraph(s))
 	}
-	rootNode.Nodes[1].Nodes = append(rootNode.Nodes[1].Nodes, reportNode)
+	child(rootNode.FirstChild, atom.Body).AppendChild(&reportNode)
+}
+
+func newParagraph(text string) *html.Node {
+	n := html.Node{Type: html.ElementNode, DataAtom: atom.P, Data: "p"}
+	n.AppendChild(&html.Node{Type: html.TextNode, Data: text})
+	return &n
 }
 
 func getSpecBaseName() string {
@@ -82,4 +90,20 @@ func writeFile(filePath string, content []byte) {
 	if err != nil {
 		panic("error writing output:" + filePath)
 	}
+}
+
+func marshalSpec(rootNode *html.Node) []byte {
+	var buf bytes.Buffer
+	html.Render(&buf, rootNode)
+	return buf.Bytes()
+}
+
+func unmarshalSpec(xhtml []byte) *html.Node {
+	style := "<link href=\"embedded.css\" rel=\"stylesheet\"/>"
+	full := fmt.Sprintf("<head>%s</head><body>%s</body>", style, xhtml)
+	rootNode, err := html.Parse(strings.NewReader(full))
+	if err != nil {
+		panic(err)
+	}
+	return rootNode
 }

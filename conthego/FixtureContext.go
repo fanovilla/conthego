@@ -3,6 +3,7 @@ package conthego
 import (
 	"fmt"
 	"github.com/joeycumines/go-dotnotation/dotnotation"
+	"golang.org/x/net/html"
 	"reflect"
 	"strconv"
 	"strings"
@@ -69,21 +70,21 @@ func (f fixtureContext) evalVar(rawVar string) interface{} {
 	}
 }
 
-func collectCommands(node *Node, commands *[]Command) {
+func collectCommands(node *html.Node, commands *[]Command) {
 	m := collectAttrs(node)
 	if m["href"] == "-" {
 		*commands = append(*commands, Command{node, strings.TrimSpace(m["title"]), m["styles"]})
 	}
 
-	for i := range node.Nodes {
-		collectCommands(&(node.Nodes[i]), commands)
+	for c := node.FirstChild; c != nil; c = c.NextSibling {
+		collectCommands(c, commands)
 	}
 }
 
-func collectAttrs(anchor *Node) map[string]string {
+func collectAttrs(anchor *html.Node) map[string]string {
 	m := make(map[string]string)
-	for _, a := range anchor.Attrs {
-		m[a.Name.Local] = a.Value
+	for _, a := range anchor.Attr {
+		m[a.Key] = a.Val
 	}
 	return m
 }
