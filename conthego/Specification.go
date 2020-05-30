@@ -40,6 +40,7 @@ func RunSpec(t *testing.T, internalFixture interface{}) {
 		}
 	}()
 
+	addHeaderResources(rootNode, f)
 	runCommands(rootNode, f)
 
 	bytes := marshalSpec(rootNode)
@@ -47,9 +48,10 @@ func RunSpec(t *testing.T, internalFixture interface{}) {
 	writeFile(baseName, bytes)
 }
 
-func appendStack(rootNode *html.Node, baseName string, stack string) {
+func appendStack(rootNode *html.Node, baseName string, error string) {
 	stackNode := html.Node{Type: html.ElementNode, DataAtom: atom.Div, Data: "pre", Attr: []html.Attribute{attr("class", "failure")}}
 	stackNode.AppendChild(&html.Node{Type: html.TextNode, Data: string(debug.Stack())})
+	stackNode.AppendChild(&html.Node{Type: html.TextNode, Data: error})
 	child(rootNode.FirstChild, atom.Body).AppendChild(&stackNode)
 
 	bytes := marshalSpec(rootNode)
@@ -58,12 +60,12 @@ func appendStack(rootNode *html.Node, baseName string, stack string) {
 }
 
 func runCommands(rootNode *html.Node, f *fixtureContext) {
-	commands := make([]Command, 0)
 	preProcess(rootNode)
 
 	bytes := marshalSpec(rootNode)
 	fmt.Println("after pre-processing:" + string(bytes))
 
+	commands := make([]Command, 0)
 	collectCommands(rootNode, &commands)
 	reportLines := processCommands(f, &commands)
 
@@ -118,7 +120,20 @@ func marshalSpec(rootNode *html.Node) []byte {
 }
 
 func unmarshalSpec(xhtml []byte) *html.Node {
-	style := "<link href=\"embedded.css\" rel=\"stylesheet\"/>"
+	style := `
+<style>
+* {  font-family: Arial;}
+pre { padding: 6px 28px 6px 28px;    background-color: #E8EEF7;}
+pre, pre *, code, code *, kbd {  font-family: Courier New, Courier;  font-size: 10pt;}
+table { border-collapse: collapse; empty-cells: show; margin: 8px 0px 8px 0px; }
+th, td {  border: 1px solid black;  padding: 3px;}
+th {  background-color: #C3D9FF;}
+p, td, th, li, .breadcrumbs {  font-size: 10pt;}
+.success, .success * {  background-color: #afa !important;}
+.failure, .failure * {  background-color: #ffb0b0;  padding: 1px;}
+.footer {  text-align: right;  margin-top: 40px;  font-size: 8pt;  width: 100%;  color: #999; }
+</style>
+`
 	full := fmt.Sprintf("<head>%s</head><body>%s</body>", style, xhtml)
 	rootNode, err := html.Parse(strings.NewReader(full))
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
+	"reflect"
 	"strings"
 )
 
@@ -14,6 +15,38 @@ func preProcess(node *html.Node) {
 		for c := node.FirstChild; c != nil; c = c.NextSibling {
 			preProcess(c)
 		}
+	}
+}
+
+func addHeaderResources(rootNode *html.Node, f *fixtureContext) {
+	var headResources []string
+	_, ok := reflect.TypeOf(f.localFixture).MethodByName("HeadResources")
+	if ok {
+		rawVal := callMethod(f, "HeadResources()", "")
+		headResources = reflect.ValueOf(rawVal).Interface().([]string)
+	}
+	head := child(rootNode.FirstChild, atom.Head)
+	removeStyle := false
+
+	if headResources != nil {
+		for _, r := range headResources {
+			if strings.HasSuffix(r, ".css") {
+				head.AppendChild(&html.Node{Type: html.ElementNode, DataAtom: atom.Link, Data: "link",
+					Attr: []html.Attribute{attr("href", r), attr("rel", "stylesheet")},
+				})
+				removeStyle = true
+			} else if strings.HasSuffix(r, ".js") {
+				head.AppendChild(&html.Node{Type: html.ElementNode, DataAtom: atom.Script, Data: "script",
+					Attr: []html.Attribute{attr("src", r)},
+				})
+			} else {
+				fmt.Println("Unknown extension, not adding " + r)
+			}
+		}
+	}
+
+	if removeStyle {
+		head.RemoveChild(child(head, atom.Style))
 	}
 }
 

@@ -12,9 +12,12 @@ func TestPlotlyHack(t *testing.T) {
 type PlotlyHackFixture struct {
 }
 
+func (f *PlotlyHackFixture) HeadResources() []string {
+	return []string{"concordion.css", "https://cdn.plot.ly/plotly-1.2.0.min.js"}
+}
+
 func (f *PlotlyHackFixture) EmbedRaw() string {
 	return `
-		<script src="https://cdn.plot.ly/plotly-1.2.0.min.js"></script>
 		<div id="tester" style="width:600px;height:250px;"></div>
 		<script>
 			TESTER = document.getElementById('tester');
