@@ -78,7 +78,7 @@ See table examples in the `examples` directory.
 ## Notes
 
 ### specifications
-* commands processed via depth-first traversal (e.g. vars can only be used after setting, never before)
+* commands processed via depth-first traversal (e.g. vars can only be used after setting)
 * column commands processed left to right
 * empty link text currently require a single space (e.g. use `[ ]` not `[]`)
 * echo command uses a `$` prefix (not `c:echo=`)

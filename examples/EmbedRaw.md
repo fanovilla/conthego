@@ -1,3 +1,10 @@
-# plotly.js demo
+# embed-raw
 
-[ ](- "$$EmbedRaw()")
+### embed plotly.js demo
+
+[ ](- "$$EmbedPlotly()")
+
+
+### embed table demo
+
+[ ](- "$$EmbedTable()")

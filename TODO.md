@@ -7,6 +7,7 @@
 
 ## QUEUE
 * CONTRIBUTING.md
+* implement json parse - https://github.com/tidwall/gjson
 * reporting - index page
 * github build
 * github publish built specs

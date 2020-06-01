@@ -26,7 +26,7 @@ func addHeaderResources(rootNode *html.Node, f *fixtureContext) {
 		headResources = reflect.ValueOf(rawVal).Interface().([]string)
 	}
 	head := child(rootNode.FirstChild, atom.Head)
-	removeStyle := false
+	removeStyle := false // remove default styling if css injected
 
 	if headResources != nil {
 		for _, r := range headResources {
@@ -89,18 +89,16 @@ func processTable(table *html.Node) {
 	}
 	theadTr := child(thead, atom.Tr)
 	ths := children(theadTr, atom.Th) // table>thead>tr>th
-	for i := range ths {              // for each header col
-		anchor := child(ths[i], atom.A) // find first command and check presence of iterator ":"
-		if anchor != nil {
-			instr := collectAttrs(anchor)["title"]
-			if isCommand(anchor) && strings.Contains(instr, ":") {
-				anchor.Parent.RemoveChild(anchor)
-				anchor.Attr = []html.Attribute{attr("href", "-"), attr("title", strings.ReplaceAll(instr, ":", "="))}
-				table.Parent.InsertBefore(anchor, table) //hoist up the iterator command; for convenience
-				processTableStructs(table, instr[:strings.Index(instr, ":")])
-			} else {
-				processTablePerRow(table)
-			}
+	anchor := child(ths[0], atom.A)   // find first command and check presence of iterator ":"
+	if anchor != nil {
+		instr := collectAttrs(anchor)["title"]
+		if isCommand(anchor) && strings.Contains(instr, ":") {
+			anchor.Parent.RemoveChild(anchor)
+			anchor.Attr = []html.Attribute{attr("href", "-"), attr("title", strings.ReplaceAll(instr, ":", "="))}
+			table.Parent.InsertBefore(anchor, table) //hoist up the iterator command; for convenience
+			processTableStructs(table, instr[:strings.Index(instr, ":")])
+		} else {
+			processTablePerRow(table)
 		}
 	}
 }
