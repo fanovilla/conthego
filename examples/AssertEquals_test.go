@@ -13,7 +13,7 @@ type AssertEqualsFixture struct {
 }
 
 func (f *AssertEqualsFixture) GetGreeting() string {
-	return "Hello World!"
+	return "Hello World! break test"
 }
 
 func (f *AssertEqualsFixture) GetPersonalisedGreeting(name string) string {
