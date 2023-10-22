@@ -6,7 +6,6 @@ import (
 	"github.com/gomarkdown/markdown"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
-	"io/ioutil"
 	"os"
 	"runtime/debug"
 	"testing"
@@ -96,7 +95,7 @@ func getSpecBaseName() string {
 }
 
 func readFile(filePath string) []byte {
-	content, err := ioutil.ReadFile(filePath)
+	content, err := os.ReadFile(filePath)
 	if err != nil {
 		panic("specification not found:" + filePath)
 	}
@@ -105,9 +104,9 @@ func readFile(filePath string) []byte {
 
 func writeFile(filePath string, content []byte) {
 	wd, _ := os.Getwd()
-	name := wd + "/_" + filePath[strings.LastIndex(filePath, "/")+1:len(filePath)] + ".html"
+	name := wd + "/_" + filePath[strings.LastIndex(filePath, "/")+1:] + ".html"
 	fmt.Println("Writing output file" + name)
-	err := ioutil.WriteFile(name, content, 0666)
+	err := os.WriteFile(name, content, 0666)
 	if err != nil {
 		panic("error writing output:" + filePath)
 	}
@@ -115,7 +114,10 @@ func writeFile(filePath string, content []byte) {
 
 func marshalSpec(rootNode *html.Node) []byte {
 	var buf bytes.Buffer
-	html.Render(&buf, rootNode)
+	err := html.Render(&buf, rootNode)
+	if err != nil {
+		panic("unable tp render spec html")
+	}
 	return buf.Bytes()
 }
 

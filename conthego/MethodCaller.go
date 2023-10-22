@@ -44,7 +44,7 @@ func callMethod(f *fixtureContext, instr string, textVal string) interface{} {
 	return atom
 }
 
-//https://github.com/kubernetes/kops/blob/master/util/pkg/reflectutils/walk.go
+// https://github.com/kubernetes/kops/blob/master/util/pkg/reflectutils/walk.go
 func invokeMethodInternal(target interface{}, name string, args ...interface{}) ([]reflect.Value, error) {
 	v := reflect.ValueOf(target)
 
@@ -102,7 +102,7 @@ func structToMap(m interface{}) map[string]interface{} {
 
 func Invoke(any interface{}, name string, args ...interface{}) {
 	inputs := make([]reflect.Value, len(args))
-	for i, _ := range args {
+	for i := range args {
 		inputs[i] = reflect.ValueOf(args[i])
 	}
 	reflect.ValueOf(any).MethodByName(name).Call(inputs)
