@@ -28,20 +28,18 @@ func addHeaderResources(rootNode *html.Node, f *fixtureContext) {
 	head := child(rootNode.FirstChild, atom.Head)
 	removeStyle := false // remove default styling if css injected
 
-	if headResources != nil {
-		for _, r := range headResources {
-			if strings.HasSuffix(r, ".css") {
-				head.AppendChild(&html.Node{Type: html.ElementNode, DataAtom: atom.Link, Data: "link",
-					Attr: []html.Attribute{attr("href", r), attr("rel", "stylesheet")},
-				})
-				removeStyle = true
-			} else if strings.HasSuffix(r, ".js") {
-				head.AppendChild(&html.Node{Type: html.ElementNode, DataAtom: atom.Script, Data: "script",
-					Attr: []html.Attribute{attr("src", r)},
-				})
-			} else {
-				fmt.Println("Unknown extension, not adding " + r)
-			}
+	for _, r := range headResources {
+		if strings.HasSuffix(r, ".css") {
+			head.AppendChild(&html.Node{Type: html.ElementNode, DataAtom: atom.Link, Data: "link",
+				Attr: []html.Attribute{attr("href", r), attr("rel", "stylesheet")},
+			})
+			removeStyle = true
+		} else if strings.HasSuffix(r, ".js") {
+			head.AppendChild(&html.Node{Type: html.ElementNode, DataAtom: atom.Script, Data: "script",
+				Attr: []html.Attribute{attr("src", r)},
+			})
+		} else {
+			fmt.Println("Unknown extension, not adding " + r)
 		}
 	}
 
@@ -140,7 +138,7 @@ func processTableStructs(table *html.Node, loopVar string) {
 				dotPos := strings.Index(rawTitle, ".")
 				if dotPos >= 0 {
 					pre := rawTitle[0:dotPos]
-					post := rawTitle[dotPos:len(rawTitle)]
+					post := rawTitle[dotPos:]
 					textNode := textNode(tds[i])
 					text := ""
 					if textNode != nil {

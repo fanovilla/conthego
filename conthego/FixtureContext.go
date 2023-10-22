@@ -142,21 +142,21 @@ func processCommands(f *fixtureContext, commands *[]Command) []string {
 		} else if strings.HasSuffix(instr, ")") && strings.Contains(instr, "=") {
 			// var assignment, method call
 			varName := strings.TrimSpace(instr[0:strings.Index(instr, "=")])
-			methodCall := strings.TrimSpace(instr[strings.Index(instr, "=")+1 : len(instr)])
+			methodCall := strings.TrimSpace(instr[strings.Index(instr, "=")+1:])
 			strValue := callMethod(f, methodCall, command.getTextVal())
 			f.putVar(varName, strValue)
 			command.restyle()
 
 		} else if strings.HasSuffix(instr, ")") {
 			// method call, no var assignment (fixture side-effect)
-			methodCall := strings.TrimSpace(instr[strings.Index(instr, "=")+1 : len(instr)])
+			methodCall := strings.TrimSpace(instr[strings.Index(instr, "=")+1:])
 			callMethod(f, methodCall, command.getTextVal())
 			command.restyle()
 
 		} else if strings.Contains(instr, "=") {
 			// var re-assignment
 			varName := strings.TrimSpace(instr[0:strings.Index(instr, "=")])
-			fromVar := strings.TrimSpace(instr[strings.Index(instr, "=")+1 : len(instr)])
+			fromVar := strings.TrimSpace(instr[strings.Index(instr, "=")+1:])
 			f.putVar(varName, f.getVar(fromVar))
 			command.restyle()
 
