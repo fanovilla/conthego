@@ -6,7 +6,7 @@ require (
 	github.com/gomarkdown/markdown v0.0.0-20230922105210-14b16010c2ee
 	github.com/joeycumines/go-dotnotation v0.0.0-20180131115956-2d3612e36c5d
 	github.com/tidwall/gjson v1.17.0
-	golang.org/x/net v0.17.0
+	golang.org/x/net v0.19.0
 )
 
 require (
